@@ -10,7 +10,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
-            android:hint="Username"
+            android:hint="@string/username_hint"
             android:id="@+id/email_edittext"/>
 
     </android.support.design.widget.TextInputLayout>
@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:hint="Password"
+            android:hint="@string/password_hint"
             android:id="@+id/password_edittext"/>
 
     </android.support.design.widget.TextInputLayout>
