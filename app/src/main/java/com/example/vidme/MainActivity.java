@@ -1,6 +1,5 @@
 package com.example.vidme;
 
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.support.v13.app.FragmentPagerAdapter;
@@ -14,6 +13,12 @@ import java.util.List;
 public class MainActivity extends FragmentActivity {
 
     public static int NUM_TABS = 3;
+
+    public static int FEATURED = 0;
+    public static int NEW = 1;
+    public static int FEED = 2;
+
+    public static String LIST_TYPE = "LIST_TYPE";
 
     ViewPager mViewPager;
 
@@ -46,14 +51,22 @@ public class MainActivity extends FragmentActivity {
 
         public PagerAdapter(FragmentManager fm) {
             super(fm);
-            fragments.add(FeaturedFragment.class.getName());
-            fragments.add(NewFragment.class.getName());
-            fragments.add(FeedFragment.class.getName());
+            fragments.add(VideoListFragment.class.getName());
+            fragments.add(VideoListFragment.class.getName());
+            fragments.add(LoginFragment.class.getName());
         }
 
         @Override
         public Fragment getItem(int position) {
-            return Fragment.instantiate(getBaseContext(), fragments.get(position));
+            Bundle args = new Bundle();
+            int listType = -1;
+            switch (position) {
+                case 0: listType = FEATURED; break;
+                case 1: listType = NEW; break;
+                case 2: listType = FEED; break;
+            }
+            args.putInt(LIST_TYPE, listType);
+            return Fragment.instantiate(getBaseContext(), fragments.get(position), args);
         }
 
         @Override

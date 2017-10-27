@@ -15,8 +15,11 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import static com.example.vidme.MainActivity.FEATURED;
+import static com.example.vidme.MainActivity.LIST_TYPE;
 
-public class FeaturedFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+
+public class VideoListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private String TAG = this.getClass().getSimpleName();
 
@@ -39,23 +42,26 @@ public class FeaturedFragment extends Fragment implements SwipeRefreshLayout.OnR
         mRecyclerView = (RecyclerView) view.findViewById(R.id.featured_recyclerview);
         mRecyclerView.setLayoutManager(llm);
 
+        Bundle args = getArguments();
         ArrayList<Video> videos = new ArrayList<>();
-        videos.add(new Video() {
-            {
-                title = "New video";
-                thumbnailUrl = "https://d1wst0behutosd.cloudfront.net/videos/18524931/thumb.jpg?v2r1508952664";
-                score = 112;
-                completeUrl = "https://api.vid.me/video/18544461/stream?format=hls";
-            }
-        });
-        videos.add(new Video() {
-            {
-                title = "New video 2";
-                thumbnailUrl = "https://d1wst0behutosd.cloudfront.net/videos/18503481/thumb.jpg?v2r1508872155";
-                score = 1;
-                completeUrl = "https://vid.me/e/gjMy";
-            }
-        });
+        if (args.getInt(LIST_TYPE) == FEATURED) {
+            videos.add(new Video() {
+                {
+                    title = "New video";
+                    thumbnailUrl = "https://d1wst0behutosd.cloudfront.net/videos/18524931/thumb.jpg?v2r1508952664";
+                    score = 112;
+                    completeUrl = "https://api.vid.me/video/18544461/stream?format=hls";
+                }
+            });
+            videos.add(new Video() {
+                {
+                    title = "New video 2";
+                    thumbnailUrl = "https://d1wst0behutosd.cloudfront.net/videos/18503481/thumb.jpg?v2r1508872155";
+                    score = 1;
+                    completeUrl = "https://vid.me/e/gjMy";
+                }
+            });
+        }
         VideosListAdapter adapter = new VideosListAdapter(videos, getActivity(), new VideosListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Video item) {

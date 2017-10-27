@@ -6,6 +6,7 @@
     <string name="featured_tab_title">Featured</string>
     <string name="new_tab_title">New</string>
     <string name="feed_tab_title">Feed</string>
+    <string name="login_button">Login</string>
     <plurals name="numberOfLikes">
         <!--
              As a developer, you should always supply "one" and "other"
