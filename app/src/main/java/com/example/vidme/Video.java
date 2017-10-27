@@ -5,7 +5,7 @@ public class Video {
 
     public String videoId;
 
-    public String url;
+    public String completeUrl;
 
     public String title;
 

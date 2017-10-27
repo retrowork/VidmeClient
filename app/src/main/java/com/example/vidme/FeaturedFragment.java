@@ -1,6 +1,7 @@
 package com.example.vidme;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -43,7 +45,7 @@ public class FeaturedFragment extends Fragment implements SwipeRefreshLayout.OnR
                 title = "New video";
                 thumbnailUrl = "https://d1wst0behutosd.cloudfront.net/videos/18524931/thumb.jpg?v2r1508952664";
                 score = 112;
-                url = "https://vid.me/QZn7M";
+                completeUrl = "https://api.vid.me/video/18544461/stream?format=hls";
             }
         });
         videos.add(new Video() {
@@ -51,10 +53,17 @@ public class FeaturedFragment extends Fragment implements SwipeRefreshLayout.OnR
                 title = "New video 2";
                 thumbnailUrl = "https://d1wst0behutosd.cloudfront.net/videos/18503481/thumb.jpg?v2r1508872155";
                 score = 1;
-                url = "https:\\/\\/vid.me\\/QZn7M";
+                completeUrl = "https://vid.me/e/gjMy";
             }
         });
-        VideosListAdapter adapter = new VideosListAdapter(videos, getActivity());
+        VideosListAdapter adapter = new VideosListAdapter(videos, getActivity(), new VideosListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Video item) {
+                Intent intent = new Intent(getActivity(), PlayerActivity.class);
+                intent.putExtra("VIDEO_URL", item.completeUrl);
+                startActivity(intent);
+            }
+        });
         mRecyclerView.setAdapter(adapter);
         return view;
     }
