@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolder>  {
@@ -28,8 +29,8 @@ class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolde
 
     private Context mContext;
 
-    VideosListAdapter(List<Video> videos, Context context, OnItemClickListener listener) {
-        this.mVideosList = videos;
+    VideosListAdapter(Context context, OnItemClickListener listener) {
+        this.mVideosList = new ArrayList<>();
         this.mContext = context;
         this.listener = listener;
     }
@@ -41,6 +42,10 @@ class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolde
         return new ViewHolder(v);
     }
 
+    public void addAll(List<Video> videos) {
+        this.mVideosList.addAll(videos);
+    }
+
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         final Video videoItem = mVideosList.get(position);
@@ -50,13 +55,13 @@ class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolde
         holder.score.setText(scoreText);
         Glide.with(mContext)
                 .load(videoItem.thumbnailUrl)
+                .asBitmap()
                 .into(holder.videoThumbnail);
-        holder.videoThumbnail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.onItemClick(videoItem);
-            }
-        });
+        holder.setOnClickListener(videoItem, listener);
+    }
+
+    public void clearAdapter() {
+        mVideosList.clear();
     }
 
     @Override
@@ -76,6 +81,15 @@ class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolde
             title = (TextView) itemView.findViewById(R.id.video_title);
             score = (TextView) itemView.findViewById(R.id.video_score);
             videoThumbnail = (ImageView) itemView.findViewById(R.id.video_thumbnail);
+        }
+
+        public void setOnClickListener(final Video videoItem, final OnItemClickListener listener) {
+            videoThumbnail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onItemClick(videoItem);
+                }
+            });
         }
     }
 }

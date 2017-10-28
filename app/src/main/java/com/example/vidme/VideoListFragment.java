@@ -13,10 +13,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import io.reactivex.Observer;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.Subject;
 
 import static com.example.vidme.MainActivity.FEATURED;
 import static com.example.vidme.MainActivity.LIST_TYPE;
+import static com.example.vidme.MainActivity.NEW;
 
 
 public class VideoListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -27,6 +41,12 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
+    private VidmeService mVidmeService;
+
+    private VideosListAdapter mAdapter;
+
+    private int mListType;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -36,6 +56,8 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
 
+        mVidmeService = new VidmeService();
+
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.featured_swipe);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
@@ -43,40 +65,77 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
         mRecyclerView.setLayoutManager(llm);
 
         Bundle args = getArguments();
-        ArrayList<Video> videos = new ArrayList<>();
-        if (args.getInt(LIST_TYPE) == FEATURED) {
-            videos.add(new Video() {
-                {
-                    title = "New video";
-                    thumbnailUrl = "https://d1wst0behutosd.cloudfront.net/videos/18524931/thumb.jpg?v2r1508952664";
-                    score = 112;
-                    completeUrl = "https://api.vid.me/video/18544461/stream?format=hls";
-                }
-            });
-            videos.add(new Video() {
-                {
-                    title = "New video 2";
-                    thumbnailUrl = "https://d1wst0behutosd.cloudfront.net/videos/18503481/thumb.jpg?v2r1508872155";
-                    score = 1;
-                    completeUrl = "https://vid.me/e/gjMy";
-                }
-            });
-        }
-        VideosListAdapter adapter = new VideosListAdapter(videos, getActivity(), new VideosListAdapter.OnItemClickListener() {
+        mListType = args.getInt(LIST_TYPE);
+        mAdapter = new VideosListAdapter(getActivity(), new VideosListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Video item) {
                 Intent intent = new Intent(getActivity(), PlayerActivity.class);
+                Log.v(TAG, item.thumbnailUrl);
                 intent.putExtra("VIDEO_URL", item.completeUrl);
                 startActivity(intent);
             }
         });
-        mRecyclerView.setAdapter(adapter);
+        mRecyclerView.setAdapter(mAdapter);
         return view;
+    }
+
+    private void receiveData() {
+        try {
+            Observer<Response> myObserver = new Observer<Response>() {
+                @Override
+                public void onSubscribe(Disposable d) {
+
+                }
+
+                @Override
+                public void onNext(Response value) {
+                    List<Video> videos = value.getVideos();
+                    mAdapter.clearAdapter();
+                    mAdapter.addAll(videos);
+                    mAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.v(TAG, "onError " + e.getMessage());
+                }
+
+                @Override
+                public void onComplete() {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
+            };
+
+            if (mListType == FEATURED) {
+                mVidmeService.getFeaturedVideos()
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(myObserver);
+
+            } else if (mListType == NEW) {
+                mVidmeService.getNewVideos()
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(myObserver);
+            }
+        } catch (IOException e) {
+            Log.d(TAG, e.getMessage());
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        receiveData();
     }
 
     @Override
     public void onRefresh() {
-        Log.v(TAG, "onRefresh");
-        mSwipeRefreshLayout.setRefreshing(false);
+        receiveData();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }
