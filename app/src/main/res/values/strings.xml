@@ -9,6 +9,7 @@
     <string name="login_button">Login</string>
     <string name="username_hint">Username</string>
     <string name="password_hint">Password</string>
+    <string name="logout_menuitem">Logout</string>
     <plurals name="numberOfLikes">
         <!--
              As a developer, you should always supply "one" and "other"

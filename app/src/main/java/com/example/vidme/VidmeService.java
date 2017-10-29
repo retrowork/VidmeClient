@@ -29,4 +29,8 @@ public class VidmeService {
     Observable<Response> getNewVideos(int limit, int offset) throws IOException {
         return vidmeApi.listNewVideos(limit, offset);
     }
+
+    Observable<AuthResponse> createAuthSession(String username, String password) throws IOException {
+        return vidmeApi.createAuthSession(username, password);
+    }
 }
