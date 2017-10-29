@@ -15,6 +15,7 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
@@ -33,7 +34,7 @@ import com.google.android.exoplayer2.util.Util;
 
 import java.util.concurrent.ExecutionException;
 
-public class PlayerActivity extends AppCompatActivity implements ExoPlayer.EventListener{
+public class PlayerActivity extends AppCompatActivity implements Player.EventListener {
 
     private SimpleExoPlayerView mPlayerView;
 
@@ -93,9 +94,9 @@ public class PlayerActivity extends AppCompatActivity implements ExoPlayer.Event
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        if (playbackState == ExoPlayer.STATE_BUFFERING) {
+        if (playbackState == Player.STATE_BUFFERING) {
             mProgressBar.setVisibility(View.VISIBLE);
-        } else if (playbackState == ExoPlayer.STATE_READY) {
+        } else if (playbackState == Player.STATE_READY) {
             mProgressBar.setVisibility(View.GONE);
         }
     }
