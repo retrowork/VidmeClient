@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.reactivestreams.Subscriber;
@@ -45,25 +47,41 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
 
     private VideosListAdapter mAdapter;
 
+    private final int LIMIT = 10; // limit per page
+
+    private int mOffset;
+
     private int mListType;
+
+    private ProgressBar mProgressBar;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG, "onCreateView");
         View view =  inflater.inflate(R.layout.featured_fragment, container, false);
-
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
 
         mVidmeService = new VidmeService();
+        mOffset = 0;
+
+        mProgressBar = (ProgressBar) view.findViewById(R.id.item_progress_bar);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.featured_swipe);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.featured_recyclerview);
         mRecyclerView.setLayoutManager(llm);
-
+        mRecyclerView.addItemDecoration(
+                new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
+        EndlessRecyclerOnScrollListener listener = new EndlessRecyclerOnScrollListener() {
+            @Override
+            public void onLoadMore() {
+                VideoListFragment.this.onLoadMore();
+            }
+        };
+        mRecyclerView.addOnScrollListener(listener);
         Bundle args = getArguments();
         mListType = args.getInt(LIST_TYPE);
         mAdapter = new VideosListAdapter(getActivity(), new VideosListAdapter.OnItemClickListener() {
@@ -76,6 +94,7 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
             }
         });
         mRecyclerView.setAdapter(mAdapter);
+        receiveData();
         return view;
     }
 
@@ -90,7 +109,9 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
                 @Override
                 public void onNext(Response value) {
                     List<Video> videos = value.getVideos();
-                    mAdapter.clearAdapter();
+                    if (mOffset == 0) {
+                        mAdapter.clearAdapter();
+                    }
                     mAdapter.addAll(videos);
                     mAdapter.notifyDataSetChanged();
                 }
@@ -102,18 +123,20 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
 
                 @Override
                 public void onComplete() {
-                    mSwipeRefreshLayout.setRefreshing(false);
+                    if (mSwipeRefreshLayout.isRefreshing()) {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                    }
                 }
             };
 
             if (mListType == FEATURED) {
-                mVidmeService.getFeaturedVideos()
+                mVidmeService.getFeaturedVideos(LIMIT, mOffset)
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(myObserver);
 
             } else if (mListType == NEW) {
-                mVidmeService.getNewVideos()
+                mVidmeService.getNewVideos(LIMIT, mOffset)
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(myObserver);
@@ -124,9 +147,15 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        Log.v(TAG, "onStart");
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        receiveData();
+        Log.v(TAG, "onResume");
     }
 
     @Override
@@ -137,5 +166,13 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mRecyclerView.clearOnScrollListeners();
+    }
+
+    public void onLoadMore() {
+        mOffset += 10;
+        mProgressBar.setVisibility(View.VISIBLE);
+        Log.v(TAG, "OFFSET : " + mOffset);
+        receiveData();
     }
 }

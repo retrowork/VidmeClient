@@ -56,6 +56,7 @@ class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolde
         Glide.with(mContext)
                 .load(videoItem.thumbnailUrl)
                 .asBitmap()
+                .placeholder(R.drawable.placeholder)
                 .into(holder.videoThumbnail);
         holder.setOnClickListener(videoItem, listener);
     }

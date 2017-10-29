@@ -22,11 +22,11 @@ public class VidmeService {
         vidmeApi = retrofit.create(VidmeApi.class);
     }
 
-    Observable<Response> getFeaturedVideos() throws IOException {
-        return vidmeApi.listFeaturedVideos();
+    Observable<Response> getFeaturedVideos(int limit, int offset) throws IOException {
+        return vidmeApi.listFeaturedVideos(limit, offset);
     }
 
-    Observable<Response> getNewVideos() throws IOException {
-        return vidmeApi.listNewVideos();
+    Observable<Response> getNewVideos(int limit, int offset) throws IOException {
+        return vidmeApi.listNewVideos(limit, offset);
     }
 }
