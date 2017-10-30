@@ -1,4 +1,4 @@
-package com.example.vidme;
+package com.example.vidme.model;
 
 
 import com.google.gson.annotations.SerializedName;

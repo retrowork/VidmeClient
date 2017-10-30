@@ -1,4 +1,4 @@
-package com.example.vidme;
+package com.example.vidme.player;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
+import com.example.vidme.R;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;

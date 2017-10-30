@@ -1,8 +1,6 @@
-package com.example.vidme;
+package com.example.vidme.login;
 
-import android.accounts.AccountManager;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -14,7 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+
+import com.example.vidme.R;
+import com.example.vidme.model.Auth;
+import com.example.vidme.model.AuthResponse;
+import com.example.vidme.network.VidmeService;
+import com.example.vidme.videolist.VideoListFragment;
 
 import java.io.IOException;
 
@@ -22,17 +25,16 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.http.Body;
 
-import static com.example.vidme.MainActivity.FEED;
-import static com.example.vidme.MainActivity.LIST_TYPE;
+import static com.example.vidme.navigation.MainActivity.FEED;
+import static com.example.vidme.navigation.MainActivity.LIST_TYPE;
 
 public class LoginFragment extends Fragment implements View.OnClickListener {
 
     public OnLogin listener;
 
     public interface OnLogin {
-        void showVideosList();
+        void onLoginListener();
     }
 
     private String TAG = getClass().getSimpleName();
@@ -85,7 +87,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
                     SharedPreferences.Editor editor = sp.edit();
                     editor.putString("ACCESS_TOKEN", token);
                     editor.apply();
-                    listener.showVideosList();
+                    showVideosList();
                 }
             }
 
@@ -108,5 +110,15 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         } catch (IOException e) {
             Log.v(TAG, e.getMessage());
         }
+    }
+
+    private void showVideosList() {
+        VideoListFragment fragment = new VideoListFragment();
+        Bundle args = new Bundle();
+        args.putInt(LIST_TYPE, FEED);
+        fragment.setArguments(args);
+        listener.onLoginListener();
+        ((ContainerFragment)getParentFragment())
+                .showVideosList();
     }
 }

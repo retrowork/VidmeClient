@@ -1,4 +1,4 @@
-package com.example.vidme;
+package com.example.vidme.videolist;
 
 
 import android.support.v7.widget.LinearLayoutManager;

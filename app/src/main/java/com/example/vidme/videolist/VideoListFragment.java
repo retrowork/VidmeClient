@@ -1,8 +1,10 @@
-package com.example.vidme;
+package com.example.vidme.videolist;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
@@ -13,26 +15,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import com.example.vidme.player.PlayerActivity;
+import com.example.vidme.R;
+import com.example.vidme.model.Response;
+import com.example.vidme.model.Video;
+import com.example.vidme.network.VidmeService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observer;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.Subject;
 
-import static com.example.vidme.MainActivity.FEATURED;
-import static com.example.vidme.MainActivity.LIST_TYPE;
-import static com.example.vidme.MainActivity.NEW;
+import static com.example.vidme.navigation.MainActivity.LIST_TYPE;
 
 
 public class VideoListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -59,7 +57,7 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG, "onCreateView");
-        View view =  inflater.inflate(R.layout.featured_fragment, container, false);
+        View view = inflater.inflate(R.layout.featured_fragment, container, false);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
 
@@ -94,11 +92,11 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
             }
         });
         mRecyclerView.setAdapter(mAdapter);
-        receiveData();
+        receiveData(mListType);
         return view;
     }
 
-    private void receiveData() {
+    private void receiveData(int listType) {
         try {
             Observer<Response> myObserver = new Observer<Response>() {
                 @Override
@@ -129,21 +127,20 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
                 }
             };
 
-            if (mListType == FEATURED) {
-                mVidmeService.getFeaturedVideos(LIMIT, mOffset)
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(myObserver);
+            String token = getToken();
+            mVidmeService.getVideos(listType, LIMIT, mOffset, token)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(myObserver);
 
-            } else if (mListType == NEW) {
-                mVidmeService.getNewVideos(LIMIT, mOffset)
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(myObserver);
-            }
         } catch (IOException e) {
             Log.d(TAG, e.getMessage());
         }
+    }
+
+    private String getToken() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        return sp.getString("ACCESS_TOKEN", "");
     }
 
     @Override
@@ -160,7 +157,7 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
 
     @Override
     public void onRefresh() {
-        receiveData();
+        receiveData(mListType);
     }
 
     @Override
@@ -173,6 +170,6 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
         mOffset += 10;
         mProgressBar.setVisibility(View.VISIBLE);
         Log.v(TAG, "OFFSET : " + mOffset);
-        receiveData();
+        receiveData(mListType);
     }
 }
