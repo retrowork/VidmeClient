@@ -1,6 +1,7 @@
 package com.example.vidme.videolist;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.TransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.vidme.R;
 import com.example.vidme.model.Video;
 
@@ -52,9 +55,9 @@ class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolde
         String scoreText = mContext.getResources().getQuantityString(R.plurals.numberOfLikes, score, score);
         holder.score.setText(scoreText);
         Glide.with(mContext)
-                .load(videoItem.thumbnailUrl)
                 .asBitmap()
-                .placeholder(R.drawable.placeholder)
+                .apply(RequestOptions.placeholderOf(R.drawable.placeholder))
+                .load(videoItem.thumbnailUrl)
                 .into(holder.videoThumbnail);
         holder.setOnClickListener(videoItem, listener);
     }
