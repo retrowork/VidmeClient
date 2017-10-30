@@ -24,6 +24,10 @@ import com.example.vidme.videolist.VideoListFragment;
 
 import java.io.IOException;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -33,7 +37,7 @@ import retrofit2.HttpException;
 import static com.example.vidme.navigation.MainActivity.FEED;
 import static com.example.vidme.navigation.MainActivity.LIST_TYPE;
 
-public class LoginFragment extends Fragment implements View.OnClickListener {
+public class LoginFragment extends Fragment {
 
     public OnLogin listener;
 
@@ -43,27 +47,32 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
     private String TAG = getClass().getSimpleName();
 
-    private TextInputLayout mUsernameWrapper;
-    private TextInputLayout mPasswordWrapper;
 
-    private EditText mUsernameEditText;
-    private EditText mPasswordEditText;
-    private Button mLoginButton;
+    @BindView(R.id.username) TextInputLayout mUsernameWrapper;
+    @BindView(R.id.password) TextInputLayout mPasswordWrapper;
+
+    @BindView(R.id.username_edittext) EditText mUsernameEditText;
+    @BindView(R.id.password_edittext) EditText mPasswordEditText;
+
+    @BindView(R.id.login_button) Button mLoginButton;
 
     private VidmeService mVidmeService;
+
+    private Unbinder mUnbinder;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.login_fragment, container, false);
+        mUnbinder = ButterKnife.bind(this, view);
         mVidmeService = new VidmeService();
-        mUsernameEditText = (EditText) view.findViewById(R.id.email_edittext);
-        mPasswordEditText = (EditText) view.findViewById(R.id.password_edittext);
-        mUsernameWrapper = (TextInputLayout) view.findViewById(R.id.username);
-        mPasswordWrapper = (TextInputLayout) view.findViewById(R.id.password);
-        mLoginButton = (Button) view.findViewById(R.id.login_button);
-        mLoginButton.setOnClickListener(this);
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
     }
 
     @Override
@@ -76,8 +85,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    @Override
-    public void onClick(View view) {
+    @OnClick(R.id.login_button)
+    public void onClick() {
         mPasswordWrapper.setErrorEnabled(false);
         mUsernameWrapper.setErrorEnabled(false);
         String username = mUsernameEditText.getText().toString();

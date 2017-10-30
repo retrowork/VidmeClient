@@ -35,13 +35,18 @@ import com.google.android.exoplayer2.util.Util;
 
 import java.util.concurrent.ExecutionException;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class PlayerActivity extends AppCompatActivity implements Player.EventListener {
 
-    private SimpleExoPlayerView mPlayerView;
+    @BindView(R.id.player_view)
+    SimpleExoPlayerView mPlayerView;
 
     private SimpleExoPlayer mExoPlayer;
 
-    private ProgressBar mProgressBar;
+    @BindView(R.id.video_progress_bar)
+    ProgressBar mProgressBar;
 
     private String TAG = getClass().getSimpleName();
 
@@ -49,9 +54,7 @@ public class PlayerActivity extends AppCompatActivity implements Player.EventLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
-        mPlayerView = (SimpleExoPlayerView) findViewById(R.id.player_view);
-        mProgressBar = (ProgressBar) findViewById(R.id.video_progress_bar);
-
+        ButterKnife.bind(this);
     }
 
     @Override

@@ -27,6 +27,9 @@ import com.example.vidme.network.VidmeService;
 import java.io.IOException;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -40,15 +43,19 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
 
     private String TAG = this.getClass().getSimpleName();
 
-    private RecyclerView mRecyclerView;
+    @BindView(R.id.videolist_recyclerview)
+    RecyclerView mRecyclerView;
 
     EndlessRecyclerOnScrollListener mScrollListener;
 
-    private View mErrorView;
+    @BindView(R.id.errorView)
+    View mErrorView;
 
-    private View mLoadingView;
+    @BindView(R.id.loadingView)
+    View mLoadingView;
 
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    @BindView(R.id.swipe_videoslist)
+    SwipeRefreshLayout mSwipeRefreshLayout;
 
     private VidmeService mVidmeService;
 
@@ -60,27 +67,25 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
 
     private int mListType;
 
-    private ProgressBar mProgressBar;
+    private Unbinder mUnbinder;
+
+    @BindView(R.id.item_progress_bar)
+    ProgressBar mProgressBar;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.video_list_fragment, container, false);
+        mUnbinder = ButterKnife.bind(this, view);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
 
         mVidmeService = new VidmeService();
         mOffset = 0;
 
-        mProgressBar = (ProgressBar) view.findViewById(R.id.item_progress_bar);
-        mErrorView = (View) view.findViewById(R.id.errorView);
-
-        mLoadingView = (View) view.findViewById(R.id.loadingView);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.featured_swipe);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.featured_recyclerview);
         mRecyclerView.setLayoutManager(llm);
         mRecyclerView.addItemDecoration(
                 new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
@@ -111,6 +116,12 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
         receiveData(mListType, false);
         mRecyclerView.addOnScrollListener(mScrollListener);
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
     }
 
     private void receiveData(final int listType, final boolean isRefreshing) {
@@ -193,12 +204,6 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
         mOffset = 0;
         Log.v(TAG, "onRefresh");
         receiveData(mListType, true);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mRecyclerView.clearOnScrollListeners();
     }
 
     public void onLoadMore() {

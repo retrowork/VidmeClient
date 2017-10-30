@@ -22,6 +22,9 @@ import com.example.vidme.videolist.VideoListFragment;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends FragmentActivity implements LoginFragment.OnLogin {
 
     public static final int NUM_TABS = 3;
@@ -32,9 +35,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnLo
 
     public static String LIST_TYPE = "LIST_TYPE";
 
-    private ImageButton mPopupMenuButton;
+    @BindView(R.id.popupMenuButton)
+    ImageButton mPopupMenuButton;
 
-    private ViewPager mViewPager;
+    @BindView(R.id.pager)
+    ViewPager mViewPager;
 
     private PagerAdapter mAdapter;
 
@@ -42,9 +47,8 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnLo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mPopupMenuButton = (ImageButton) findViewById(R.id.popupMenuButton);
         mAdapter = new PagerAdapter(getFragmentManager());
         mViewPager.setAdapter(mAdapter);
         mViewPager.setOffscreenPageLimit(3); // do not destroy inactive fragments
@@ -126,7 +130,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnLo
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 logout();
-
                 return true;
             }
         });
@@ -135,7 +138,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnLo
 
     private void logout() {
        removeAuthToken();
-        ((ContainerFragment) mAdapter.getItem(2)).showLoginForm(); 
+        ((ContainerFragment) mAdapter.getItem(2)).showLoginForm();
        mPopupMenuButton.setVisibility(View.GONE);
     }
 
