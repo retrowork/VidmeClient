@@ -69,8 +69,6 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
 
     private Unbinder mUnbinder;
 
-    private Disposable mDisposable;
-
     @BindView(R.id.item_progress_bar)
     ProgressBar mProgressBar;
 
@@ -128,10 +126,10 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
 
     private void receiveData(final int listType, final boolean isRefreshing) {
         try {
-            Observer<Response> observer = new Observer<Response>() {
+            Observer<Response> myObserver = new Observer<Response>() {
                 @Override
                 public void onSubscribe(Disposable d) {
-                    mDisposable = d;
+
                 }
 
                 @Override
@@ -171,7 +169,7 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
             mVidmeService.getVideos(listType, LIMIT, mOffset, token)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(observer);
+                    .subscribe(myObserver);
 
         } catch (IOException e) {
             Log.d(TAG, e.getMessage());
@@ -212,13 +210,5 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
         mProgressBar.setVisibility(View.VISIBLE);
         mOffset+=10;
         receiveData(mListType, false);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (!mDisposable.isDisposed()){
-            mDisposable.dispose();
-        }
     }
 }
