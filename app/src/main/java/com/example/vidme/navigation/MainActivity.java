@@ -126,7 +126,7 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnLo
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 logout();
-                ((ContainerFragment) mAdapter.getItem(2)).showLoginForm();
+
                 return true;
             }
         });
@@ -134,6 +134,12 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnLo
     }
 
     private void logout() {
+       removeAuthToken();
+        ((ContainerFragment) mAdapter.getItem(2)).showLoginForm(); 
+       mPopupMenuButton.setVisibility(View.GONE);
+    }
+
+    private void removeAuthToken() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         SharedPreferences.Editor editor = sp.edit();
         editor.remove("ACCESS_TOKEN");
