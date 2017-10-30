@@ -66,7 +66,7 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         Log.v(TAG, "onCreateView");
-        View view = inflater.inflate(R.layout.featured_fragment, container, false);
+        View view = inflater.inflate(R.layout.video_list_fragment, container, false);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
 
