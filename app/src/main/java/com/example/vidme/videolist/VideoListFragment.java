@@ -69,13 +69,14 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
 
     private Unbinder mUnbinder;
 
+    private Disposable mDisposable;
+
     @BindView(R.id.item_progress_bar)
     ProgressBar mProgressBar;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        Log.v(TAG, "onCreateView");
         View view = inflater.inflate(R.layout.video_list_fragment, container, false);
         mUnbinder = ButterKnife.bind(this, view);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
@@ -129,7 +130,7 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
             Observer<Response> myObserver = new Observer<Response>() {
                 @Override
                 public void onSubscribe(Disposable d) {
-
+                    mDisposable = d;
                 }
 
                 @Override
@@ -189,21 +190,26 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onStart() {
         super.onStart();
-        Log.v(TAG, "onStart");
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mScrollListener.reset(0, true);
-        Log.v(TAG, "onResume");
     }
 
     @Override
     public void onRefresh() {
         mOffset = 0;
-        Log.v(TAG, "onRefresh");
         receiveData(mListType, true);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (!mDisposable.isDisposed()) {
+            mDisposable.dispose();
+        }
     }
 
     public void onLoadMore() {
