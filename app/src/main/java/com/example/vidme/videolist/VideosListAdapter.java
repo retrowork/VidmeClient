@@ -19,6 +19,9 @@ import com.example.vidme.model.Video;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolder>  {
 
     public interface OnItemClickListener {
@@ -78,17 +81,15 @@ class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolde
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView videoThumbnail;
+        @BindView(R.id.video_thumbnail) ImageView videoThumbnail;
 
-        TextView title;
+        @BindView(R.id.video_title) TextView title;
 
-        TextView score;
+        @BindView(R.id.video_score) TextView score;
 
         ViewHolder(View itemView) {
             super(itemView);
-            title = (TextView) itemView.findViewById(R.id.video_title);
-            score = (TextView) itemView.findViewById(R.id.video_score);
-            videoThumbnail = (ImageView) itemView.findViewById(R.id.video_thumbnail);
+            ButterKnife.bind(this, itemView);
         }
 
         public void setOnClickListener(final Video videoItem, final OnItemClickListener listener) {

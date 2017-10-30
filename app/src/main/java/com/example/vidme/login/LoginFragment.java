@@ -156,16 +156,11 @@ public class LoginFragment extends Fragment {
     }
 
     private boolean isValidUsername(String username) {
-        if (username.length() < 3) {
-            return false;
-        }
-        return true;
+        return username.length() >= 3;
     }
 
     private boolean isValidPassword(String password) {
-        if (password.length() < 3)
-            return false;
-        return true;
+        return password.length() >= 3;
     }
 
     private void createAuthSession(String token) {
