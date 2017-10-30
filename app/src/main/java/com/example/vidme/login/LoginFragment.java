@@ -78,6 +78,8 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+        mPasswordWrapper.setErrorEnabled(false);
+        mUsernameWrapper.setErrorEnabled(false);
         String username = mUsernameEditText.getText().toString();
         String password = mPasswordEditText.getText().toString();
         boolean validPassword = isValidPassword(password);
@@ -113,12 +115,11 @@ public class LoginFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onError(Throwable e) {
-                Log.v(TAG, "OnError : " + e.getMessage());
                 if (e instanceof HttpException) {
                     HttpException response = (HttpException) e;
                     if (response.code() == 400) {
                         mPasswordWrapper.setError(getString(R.string.incorrect_credentials_message));
-                        mUsernameEditText.setError(getString(R.string.incorrect_credentials_message));
+                        mUsernameWrapper.setError(getString(R.string.incorrect_credentials_message));
                         mPasswordEditText.getText().clear();
                     }
                 } else {
