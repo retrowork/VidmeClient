@@ -1,8 +1,10 @@
 package com.example.vidme.videolist;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -29,6 +31,7 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.HttpException;
 
 import static com.example.vidme.navigation.MainActivity.LIST_TYPE;
 
@@ -38,6 +41,12 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
     private String TAG = this.getClass().getSimpleName();
 
     private RecyclerView mRecyclerView;
+
+    EndlessRecyclerOnScrollListener mScrollListener;
+
+    private View mErrorView;
+
+    private View mLoadingView;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -65,7 +74,9 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
         mOffset = 0;
 
         mProgressBar = (ProgressBar) view.findViewById(R.id.item_progress_bar);
+        mErrorView = (View) view.findViewById(R.id.errorView);
 
+        mLoadingView = (View) view.findViewById(R.id.loadingView);
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.featured_swipe);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
@@ -73,30 +84,36 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
         mRecyclerView.setLayoutManager(llm);
         mRecyclerView.addItemDecoration(
                 new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
-        EndlessRecyclerOnScrollListener listener = new EndlessRecyclerOnScrollListener() {
+        mScrollListener = new EndlessRecyclerOnScrollListener() {
             @Override
             public void onLoadMore() {
                 VideoListFragment.this.onLoadMore();
             }
         };
-        mRecyclerView.addOnScrollListener(listener);
+
         Bundle args = getArguments();
         mListType = args.getInt(LIST_TYPE);
         mAdapter = new VideosListAdapter(getActivity(), new VideosListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Video item) {
                 Intent intent = new Intent(getActivity(), PlayerActivity.class);
-                Log.v(TAG, item.thumbnailUrl);
                 intent.putExtra("VIDEO_URL", item.completeUrl);
                 startActivity(intent);
             }
         });
         mRecyclerView.setAdapter(mAdapter);
-        receiveData(mListType);
+        mErrorView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                receiveData(mListType, false);
+            }
+        });
+        receiveData(mListType, false);
+        mRecyclerView.addOnScrollListener(mScrollListener);
         return view;
     }
 
-    private void receiveData(int listType) {
+    private void receiveData(final int listType, final boolean isRefreshing) {
         try {
             Observer<Response> myObserver = new Observer<Response>() {
                 @Override
@@ -106,17 +123,26 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
 
                 @Override
                 public void onNext(Response value) {
+                    mErrorView.setVisibility(View.GONE);
+                    mLoadingView.setVisibility(View.GONE);
                     List<Video> videos = value.getVideos();
-                    if (mOffset == 0) {
+                    if (isRefreshing) {
+                        mScrollListener.reset(0, true);
                         mAdapter.clearAdapter();
                     }
                     mAdapter.addAll(videos);
-                    mAdapter.notifyDataSetChanged();
                 }
 
                 @Override
                 public void onError(Throwable e) {
-                    Log.v(TAG, "onError " + e.getMessage());
+                    if (e instanceof HttpException) {
+                        HttpException exception = (HttpException) e;
+                    } else {
+                        ConnectivityManager manager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+                        if (manager.getActiveNetworkInfo() == null) {
+                            setErrorView();
+                        }
+                    }
                 }
 
                 @Override
@@ -128,6 +154,7 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
             };
 
             String token = getToken();
+            mLoadingView.setVisibility(View.VISIBLE);
             mVidmeService.getVideos(listType, LIMIT, mOffset, token)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -136,6 +163,11 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
         } catch (IOException e) {
             Log.d(TAG, e.getMessage());
         }
+    }
+
+    private void setErrorView() {
+        mErrorView.setVisibility(View.VISIBLE);
+        mLoadingView.setVisibility(View.GONE);
     }
 
     private String getToken() {
@@ -152,12 +184,15 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onResume() {
         super.onResume();
+        mScrollListener.reset(0, true);
         Log.v(TAG, "onResume");
     }
 
     @Override
     public void onRefresh() {
-        receiveData(mListType);
+        mOffset = 0;
+        Log.v(TAG, "onRefresh");
+        receiveData(mListType, true);
     }
 
     @Override
@@ -167,9 +202,8 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
     }
 
     public void onLoadMore() {
-        mOffset += 10;
         mProgressBar.setVisibility(View.VISIBLE);
-        Log.v(TAG, "OFFSET : " + mOffset);
-        receiveData(mListType);
+        mOffset+=10;
+        receiveData(mListType, false);
     }
 }

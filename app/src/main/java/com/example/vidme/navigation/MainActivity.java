@@ -68,10 +68,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnLo
 
         List<String> fragments = new ArrayList<>();
 
-        VideoListFragment featuredFragment;
-
-        VideoListFragment newFragment;
-
         ContainerFragment containerFragment;
 
         @Override
@@ -91,16 +87,6 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnLo
             fragments.add(VideoListFragment.class.getName());
             fragments.add(ContainerFragment.class.getName());
 
-            Bundle args1 = new Bundle();
-            args1.putInt(LIST_TYPE, getListType(0));
-            featuredFragment = new VideoListFragment();
-            featuredFragment.setArguments(args1);
-
-            Bundle args2 = new Bundle();
-            args2.putInt(LIST_TYPE, getListType(1));
-            newFragment = new VideoListFragment();
-            newFragment.setArguments(args2);
-
             containerFragment = new ContainerFragment();
         }
 
@@ -115,9 +101,11 @@ public class MainActivity extends FragmentActivity implements LoginFragment.OnLo
 
         @Override
         public Fragment getItem(int position) {
+            Bundle args = new Bundle();
+            args.putInt(LIST_TYPE, getListType(position));
             switch (position) {
-                case 0: return featuredFragment;
-                case 1: return newFragment;
+                case 0: return Fragment.instantiate(MainActivity.this, fragments.get(0), args);
+                case 1: return Fragment.instantiate(MainActivity.this, fragments.get(1), args);
                 case 2: return containerFragment;
             }
             return null;

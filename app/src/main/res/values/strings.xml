@@ -10,14 +10,10 @@
     <string name="username_hint">Username</string>
     <string name="password_hint">Password</string>
     <string name="logout_menuitem">Logout</string>
+    <string name="incorrect_credentials_message">Incorrect username or password</string>
+    <string name="no_internet_toast">Please, check your connection</string>
+    <string name="no_internet_message_view">An error has occurred! Please check your connection</string>
     <plurals name="numberOfLikes">
-        <!--
-             As a developer, you should always supply "one" and "other"
-             strings. Your translators will know which strings are actually
-             needed for their language. Always include %d in "one" because
-             translators will need to use %d for languages where "one"
-             doesn't mean 1 (as explained above).
-          -->
         <item quantity="one">%d like</item>
         <item quantity="other">%d likes</item>
     </plurals>

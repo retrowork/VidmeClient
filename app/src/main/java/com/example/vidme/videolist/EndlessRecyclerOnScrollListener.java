@@ -3,6 +3,7 @@ package com.example.vidme.videolist;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScrollListener {
     /**
@@ -16,10 +17,11 @@ public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScr
 
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+        String TAG = getClass().getSimpleName();
         super.onScrolled(recyclerView, dx, dy);
 
         int visibleItemCount = recyclerView.getChildCount();
-        int totalItemCount = recyclerView.getLayoutManager().getItemCount();
+        int totalItemCount = recyclerView.getAdapter().getItemCount();
         int firstVisibleItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
 
         if (mLoading) {
@@ -28,15 +30,21 @@ public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScr
                 mPreviousTotal = totalItemCount;
             }
         }
-        int visibleThreshold = 3;
+        int visibleThreshold = 5;
+  //      Log.v(TAG, "totalItemCount = " + totalItemCount + " firstVisibleItem = " + firstVisibleItem + " visibleItemCount= " + visibleItemCount);
         if (!mLoading && (totalItemCount - visibleItemCount)
-                <= (firstVisibleItem + visibleThreshold)) {
+                <= (firstVisibleItem + visibleThreshold) && dy > 0) {
             // End has been reached
 
             onLoadMore();
 
             mLoading = true;
         }
+    }
+
+    public void reset(int previousTotal, boolean loading) {
+        this.mPreviousTotal = previousTotal;
+        this.mLoading = loading;
     }
 
     public abstract void onLoadMore();

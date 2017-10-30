@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.TransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.example.vidme.R;
 import com.example.vidme.model.Video;
 
@@ -45,6 +46,7 @@ class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolde
 
     public void addAll(List<Video> videos) {
         this.mVideosList.addAll(videos);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -54,9 +56,12 @@ class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolde
         int score = videoItem.score;
         String scoreText = mContext.getResources().getQuantityString(R.plurals.numberOfLikes, score, score);
         holder.score.setText(scoreText);
+        RequestOptions options = new RequestOptions()
+                .override(Target.SIZE_ORIGINAL)
+                .placeholder(R.drawable.placeholder);
         Glide.with(mContext)
                 .asBitmap()
-                .apply(RequestOptions.placeholderOf(R.drawable.placeholder))
+                .apply(options)
                 .load(videoItem.thumbnailUrl)
                 .into(holder.videoThumbnail);
         holder.setOnClickListener(videoItem, listener);
@@ -64,6 +69,7 @@ class VideosListAdapter extends RecyclerView.Adapter<VideosListAdapter.ViewHolde
 
     public void clearAdapter() {
         mVideosList.clear();
+        notifyDataSetChanged();
     }
 
     @Override

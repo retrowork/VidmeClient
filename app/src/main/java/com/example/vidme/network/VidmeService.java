@@ -1,5 +1,7 @@
 package com.example.vidme.network;
 
+import android.util.Log;
+
 import com.example.vidme.model.AuthResponse;
 import com.example.vidme.model.Response;
 import com.example.vidme.navigation.MainActivity;
@@ -13,6 +15,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class VidmeService {
     private VidmeApi vidmeApi;
+
+    String TAG = getClass().getSimpleName();
 
     public VidmeService() {
         Retrofit retrofit = new Retrofit.Builder()
