@@ -17,7 +17,6 @@ public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScr
 
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-        String TAG = getClass().getSimpleName();
         super.onScrolled(recyclerView, dx, dy);
 
         int visibleItemCount = recyclerView.getChildCount();
@@ -30,8 +29,7 @@ public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScr
                 mPreviousTotal = totalItemCount;
             }
         }
-        int visibleThreshold = 5;
-  //      Log.v(TAG, "totalItemCount = " + totalItemCount + " firstVisibleItem = " + firstVisibleItem + " visibleItemCount= " + visibleItemCount);
+        int visibleThreshold = 3;
         if (!mLoading && (totalItemCount - visibleItemCount)
                 <= (firstVisibleItem + visibleThreshold) && dy > 0) {
             // End has been reached
